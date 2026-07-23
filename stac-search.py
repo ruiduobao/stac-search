@@ -1,5 +1,24 @@
 #!/usr/bin/env python3
-"""STAC Universal Search Tool - Search any STAC endpoint for geospatial data."""
+"""STAC Universal Search Tool - Search any STAC endpoint for geospatial data.
+
+Privacy disclosure
+------------------
+When this script runs, it sends:
+* Search queries to public STAC endpoints (Planetary Computer, AWS, etc.).
+  No API keys, no local files, no PII are sent.
+
+What is NOT sent: any data from the local filesystem, any environment
+variables, any login credentials.
+
+Public domain notice
+--------------------
+This tool queries public STAC APIs. Data retrieved is subject to the
+licenses of the respective data providers.
+
+License
+-------
+MIT-0 — No Attribution.
+"""
 
 import argparse
 import json
@@ -8,6 +27,10 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 
 import requests
+
+__version__ = "0.1.0"
+
+USER_AGENT = f"stac-search/{__version__} (+https://clawhub.ai/skills/stac-search)"
 
 PRESET_ENDPOINTS = {
     "planetary-computer": "https://planetarycomputer.microsoft.com/api/stac/v1",
@@ -53,14 +76,16 @@ def search_stac(
         payload["query"] = {
             "eo:cloud_cover": {"lte": max_cloud_cover}
         }
-    resp = requests.post(url, json=payload, timeout=60)
+    headers = {"User-Agent": USER_AGENT}
+    resp = requests.post(url, json=payload, timeout=60, headers=headers)
     resp.raise_for_status()
     return resp.json()
 
 
 def list_collections(endpoint: str) -> List[Dict[str, Any]]:
     url = urljoin(endpoint.rstrip("/") + "/", "collections")
-    resp = requests.get(url, timeout=30)
+    headers = {"User-Agent": USER_AGENT}
+    resp = requests.get(url, timeout=30, headers=headers)
     resp.raise_for_status()
     data = resp.json()
     return data.get("collections", [])
@@ -68,7 +93,8 @@ def list_collections(endpoint: str) -> List[Dict[str, Any]]:
 
 def get_collection_info(endpoint: str, collection_id: str) -> Dict[str, Any]:
     url = urljoin(endpoint.rstrip("/") + "/", f"collections/{collection_id}")
-    resp = requests.get(url, timeout=30)
+    headers = {"User-Agent": USER_AGENT}
+    resp = requests.get(url, timeout=30, headers=headers)
     resp.raise_for_status()
     return resp.json()
 
