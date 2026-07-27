@@ -1,7 +1,6 @@
 ---
-description: STAC Universal Search Tool for searching geospatial data across any STAC
-  endpoint.
 name: stac-search
+description: 'STAC Universal Search Tool for searching geospatial data across any STAC'
 ---
 
 # STAC Universal Search
